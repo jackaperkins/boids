@@ -2,17 +2,12 @@ class Boid {
   // main fields
   PVector pos;
   PVector move;
-  float maxSpeed = 2.1;
   float shade;
   ArrayList<Boid> friends;
 
   // timers
   int thinkTimer = 0;
 
-  // class stuff
-  float friendRadius = 60;
-  float crowdRadius = friendRadius / 2.0;
-  float avoidRadius = 120;
 
   Boid (float xx, float yy) {
     move = new PVector(0, 0);
@@ -42,10 +37,18 @@ class Boid {
     PVector avoidObjects = getAvoidAvoids();
     PVector noise = new PVector(random(2) - 1, random(2) -1);
 
-    allign.mult(1.5);
+    allign.mult(1);
+    if (!option_friend) allign.mult(0);
+    
     avoidDir.mult(1);
-    avoidObjects.mult(2);
-    noise.mult(0.05);
+    if (!option_crowd) avoidDir.mult(0);
+    
+    avoidObjects.mult(3);
+    if (!option_avoid) avoidObjects.mult(0);
+
+    noise.mult(0.1);
+    if (!option_noise) noise.mult(0);
+
 
     stroke(0, 255, 160);
 
@@ -55,6 +58,10 @@ class Boid {
     move.add(noise);
 
     move.limit(maxSpeed);
+    
+    shade += getAverageColor() * 0.1;
+    shade += random(1) - 0.5;
+    shade = (shade + 255) % 255; //max(0, min(255, shade));
   }
 
   void getFriends () {
@@ -67,6 +74,23 @@ class Boid {
       }
     }
     friends = nearby;
+  }
+
+  float getAverageColor () {
+    float total = 0;
+    float count = 0;
+    for (Boid other : friends) {
+      if (other.shade - shade < -128) {
+        total += other.shade + 255 - shade;
+      } else if (other.shade - shade > 128) {
+        total += other.shade - 255 - shade;
+      } else {
+        total += other.shade - shade; 
+      }
+      count++;
+    }
+    if (count == 0) return shade;
+    return total / (float) count;
   }
 
   PVector getAverageDir () {
@@ -111,7 +135,7 @@ class Boid {
     }
     return steer;
   }
-  
+
   PVector getAvoidAvoids() {
     PVector steer = new PVector(0, 0);
     int count = 0;
@@ -141,17 +165,16 @@ class Boid {
       //line(this.pos.x, this.pos.y, f.pos.x, f.pos.y);
     }
     noStroke();
-    fill(shade, 40, 170);
+    fill(shade, 90, 200);
     pushMatrix();
     translate(pos.x, pos.y);
     rotate(move.heading());
     beginShape();
-    vertex(10, 0);
-    vertex(-5, 5);
-    vertex(-5, -5);
+    vertex(15 * globalScale, 0);
+    vertex(-7* globalScale, 7* globalScale);
+    vertex(-7* globalScale, -7* globalScale);
     endShape(CLOSE);
     popMatrix();
-   
   }
 
   // update all those timers!
