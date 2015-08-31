@@ -36,6 +36,7 @@ class Boid {
     PVector avoidDir = getAvoidDir(); 
     PVector avoidObjects = getAvoidAvoids();
     PVector noise = new PVector(random(2) - 1, random(2) -1);
+    PVector cohese = getCohesion();
 
     allign.mult(1);
     if (!option_friend) allign.mult(0);
@@ -49,18 +50,21 @@ class Boid {
     noise.mult(0.1);
     if (!option_noise) noise.mult(0);
 
-
+    cohese.mult(1);
+    if (!option_cohese) cohese.mult(0);
+    
     stroke(0, 255, 160);
 
     move.add(allign);
     move.add(avoidDir);
     move.add(avoidObjects);
     move.add(noise);
+    move.add(cohese);
 
     move.limit(maxSpeed);
     
-    shade += getAverageColor() * 0.1;
-    shade += random(1) - 0.5;
+    shade += getAverageColor() * 0.03;
+    shade += (random(2) - 1) ;
     shade = (shade + 255) % 255; //max(0, min(255, shade));
   }
 
@@ -68,6 +72,7 @@ class Boid {
     ArrayList<Boid> nearby = new ArrayList<Boid>();
     for (int i =0; i < boids.size(); i++) {
       Boid test = boids.get(i);
+      if (test == this) continue;
       if (abs(test.pos.x - this.pos.x) < friendRadius &&
         abs(test.pos.y - this.pos.y) < friendRadius) {
         nearby.add(test);
@@ -89,7 +94,7 @@ class Boid {
       }
       count++;
     }
-    if (count == 0) return shade;
+    if (count == 0) return 0;
     return total / (float) count;
   }
 
@@ -152,10 +157,29 @@ class Boid {
         count++;            // Keep track of how many
       }
     }
-    if (count > 0) {
-      //steer.div((float) count);
-    }
     return steer;
+  }
+  
+  PVector getCohesion () {
+   float neighbordist = 50;
+    PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all locations
+    int count = 0;
+    for (Boid other : friends) {
+      float d = PVector.dist(pos, other.pos);
+      if ((d > 0) && (d < coheseRadius)) {
+        sum.add(other.pos); // Add location
+        count++;
+      }
+    }
+    if (count > 0) {
+      sum.div(count);
+      
+      PVector desired = PVector.sub(sum, pos);  
+      return desired.setMag(0.05);
+    } 
+    else {
+      return new PVector(0, 0);
+    }
   }
 
   void draw () {

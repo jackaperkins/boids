@@ -11,40 +11,58 @@ float maxSpeed;
 float friendRadius;
 float crowdRadius;
 float avoidRadius;
+float coheseRadius;
 
 boolean option_friend = true;
 boolean option_crowd = true;
 boolean option_avoid = true;
 boolean option_noise = true;
+boolean option_cohese = true;
 
 // gui crap
 int messageTimer = 0;
 String messageText = "";
 
 void setup () {
-  size(800, 600);
+  size(1024, 576);
   textSize(16);
   recalculateConstants();
   boids = new ArrayList<Boid>();
   avoids = new ArrayList<Avoid>();
   for (int x = 100; x < width - 100; x+= 100) {
     for (int y = 100; y < height - 100; y+= 100) {
-      boids.add(new Boid(x + random(3), y + random(3)));
-      boids.add(new Boid(x + random(3), y + random(3)));
+ //   boids.add(new Boid(x + random(3), y + random(3)));
+  //    boids.add(new Boid(x + random(3), y + random(3)));
     }
   }
-  for (int x = 0; x < width; x+= 20) {
-    avoids.add(new Avoid(x, 10));
-    avoids.add(new Avoid(x, height - 10));
-  }
+  
+  setupWalls();
 }
 
 // haha
 void recalculateConstants () {
   maxSpeed = 2.1 * globalScale;
   friendRadius = 60 * globalScale;
-  crowdRadius = (friendRadius / 1.5);
+  crowdRadius = (friendRadius / 1.3);
   avoidRadius = 90 * globalScale;
+  coheseRadius = friendRadius;
+}
+
+
+void setupWalls() {
+  avoids = new ArrayList<Avoid>();
+   for (int x = 0; x < width; x+= 20) {
+    avoids.add(new Avoid(x, 10));
+    avoids.add(new Avoid(x, height - 10));
+  } 
+}
+
+void setupCircle() {
+  avoids = new ArrayList<Avoid>();
+   for (int x = 0; x < 50; x+= 1) {
+     float dir = (x / 50.0) * TWO_PI;
+    avoids.add(new Avoid(width * 0.5 + cos(dir) * height*.4, height * 0.5 + sin(dir)*height*.4));
+  } 
 }
 
 
@@ -111,8 +129,15 @@ void keyPressed () {
      option_avoid = option_avoid ? false : true;
      message("Turned obstacle avoidance " + on(option_avoid));
   }else if (key == '4') {
+     option_cohese = option_cohese ? false : true;
+     message("Turned cohesion " + on(option_cohese));
+  }else if (key == '5') {
      option_noise = option_noise ? false : true;
      message("Turned noise " + on(option_noise));
+  } else if (key == ',') {
+     setupWalls(); 
+  } else if (key == '.') {
+     setupCircle(); 
   }
   recalculateConstants();
 
