@@ -1,6 +1,7 @@
 Boid barry;
 ArrayList<Boid> boids;
 ArrayList<Avoid> avoids;
+ArrayList<Food> foods; // ziye
 
 float globalScale = .91;
 float eraseRadius = 20;
@@ -29,6 +30,7 @@ void setup () {
   recalculateConstants();
   boids = new ArrayList<Boid>();
   avoids = new ArrayList<Avoid>();
+  foods = new ArrayList<Food>(); // ziye
   for (int x = 100; x < width - 100; x+= 100) {
     for (int y = 100; y < height - 100; y+= 100) {
  //   boids.add(new Boid(x + random(3), y + random(3)));
@@ -84,6 +86,10 @@ void draw () {
     noStroke();
     fill(0, 200, 200);
     ellipse(mouseX, mouseY, 15, 15);
+  } else if (tool == "foods") { // ziye
+    noStroke();
+    fill(100);
+    rect(mouseX, mouseY, 10, 10);
   }
   for (int i = 0; i <boids.size(); i++) {
     Boid current = boids.get(i);
@@ -94,6 +100,13 @@ void draw () {
   for (int i = 0; i <avoids.size(); i++) {
     Avoid current = avoids.get(i);
     current.go();
+    current.draw();
+  }
+  
+  // ziye
+  for (int i = 0; i <foods.size(); i++) {
+    Food current = foods.get(i);
+    //current.go();
     current.draw();
   }
 
@@ -128,16 +141,19 @@ void keyPressed () {
   } else if (key == '3') {
      option_avoid = option_avoid ? false : true;
      message("Turned obstacle avoidance " + on(option_avoid));
-  }else if (key == '4') {
+  } else if (key == '4') {
      option_cohese = option_cohese ? false : true;
      message("Turned cohesion " + on(option_cohese));
-  }else if (key == '5') {
+  } else if (key == '5') {
      option_noise = option_noise ? false : true;
      message("Turned noise " + on(option_noise));
   } else if (key == ',') {
      setupWalls(); 
   } else if (key == '.') {
      setupCircle(); 
+  } else if (key == 'f') { // ziye
+     tool = "foods";
+     message("Add food");
   }
   recalculateConstants();
 
@@ -167,6 +183,9 @@ void mousePressed () {
     break;
   case "avoids":
     avoids.add(new Avoid(mouseX, mouseY));
+    break;
+  case "foods": // ziye
+    foods.add(new Food(mouseX, mouseY));
     break;
   }
 }

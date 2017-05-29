@@ -4,6 +4,7 @@ class Boid {
   PVector move;
   float shade;
   ArrayList<Boid> friends;
+  ArrayList<Food> eats; // ziye
 
   // timers
   int thinkTimer = 0;
@@ -17,6 +18,7 @@ class Boid {
     thinkTimer = int(random(10));
     shade = random(255);
     friends = new ArrayList<Boid>();
+    eats = new ArrayList<Food>();
   }
 
   void go () {
@@ -29,6 +31,7 @@ class Boid {
     }
     flock();
     pos.add(move);
+    eat(); // ziye
   }
 
   void flock () {
@@ -37,6 +40,7 @@ class Boid {
     PVector avoidObjects = getAvoidAvoids();
     PVector noise = new PVector(random(2) - 1, random(2) -1);
     PVector cohese = getCohesion();
+    PVector hunger = getHunger(); // ziye
 
     allign.mult(1);
     if (!option_friend) allign.mult(0);
@@ -53,6 +57,8 @@ class Boid {
     cohese.mult(1);
     if (!option_cohese) cohese.mult(0);
     
+    hunger.mult(5); // ziye
+    
     stroke(0, 255, 160);
 
     move.add(allign);
@@ -60,6 +66,7 @@ class Boid {
     move.add(avoidObjects);
     move.add(noise);
     move.add(cohese);
+    move.add(hunger); // ziye
 
     move.limit(maxSpeed);
     
@@ -181,6 +188,24 @@ class Boid {
       return new PVector(0, 0);
     }
   }
+  
+  // ziye
+  PVector getHunger() {
+    PVector steer = new PVector(0, 0);
+    for (Food other : foods) {
+      
+      float d = PVector.dist(pos, other.pos);
+      if ((d > 1)) {
+        PVector diff = PVector.sub(other.pos, pos);
+        diff.normalize();
+        diff.div(d);
+        steer.add(diff);
+      } else {
+        eats.add(other);
+      }
+    }
+    return steer;
+  }
 
   void draw () {
     for ( int i = 0; i < friends.size(); i++) {
@@ -209,5 +234,13 @@ class Boid {
   void wrap () {
     pos.x = (pos.x + width) % width;
     pos.y = (pos.y + height) % height;
+  }
+  
+  // ziye
+  void eat() {
+    for (Food f : eats) {
+      foods.remove(f);
+    }
+    eats = new ArrayList<Food>();
   }
 }
