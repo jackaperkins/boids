@@ -195,7 +195,7 @@ class Boid {
     for (Food other : foods) {
       
       float d = PVector.dist(pos, other.pos);
-      if ((d > 1)) {
+      if ((d > 3)) {
         PVector diff = PVector.sub(other.pos, pos);
         diff.normalize();
         diff.div(d);

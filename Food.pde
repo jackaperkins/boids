@@ -9,7 +9,7 @@ class Food {
   }
   
   void draw () {
-    fill(0, 255, 200);
+    fill(50, 200, 255);
     rect(pos.x, pos.y, 10, 10);
   }
 }
