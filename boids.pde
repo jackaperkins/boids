@@ -1,4 +1,3 @@
-Boid barry;
 ArrayList<Boid> boids;
 ArrayList<Avoid> avoids;
 
